@@ -1,0 +1,19 @@
+{
+  "name": "web-crawler",
+  "version": "0.1.0",
+  "description": "A node-based web-crawler built following a guided project on boot.dev",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pmoeller91-dev/web-crawler.git"
+  },
+  "author": "Patrick Moeller",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pmoeller91-dev/web-crawler/issues"
+  },
+  "homepage": "https://github.com/pmoeller91-dev/web-crawler#readme"
+}
