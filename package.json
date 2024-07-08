@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "description": "A node-based web-crawler built following a guided project on boot.dev",
   "main": "index.js",
+  "type": "module",
   "scripts": {
+    "build": "tsc",
+    "start": "node ./dist/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -15,5 +18,15 @@
   "bugs": {
     "url": "https://github.com/pmoeller91-dev/web-crawler/issues"
   },
-  "homepage": "https://github.com/pmoeller91-dev/web-crawler#readme"
+  "homepage": "https://github.com/pmoeller91-dev/web-crawler#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.6.0",
+    "@tsconfig/node22": "^22.0.0",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "^20.14.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^7.15.0"
+  }
 }
