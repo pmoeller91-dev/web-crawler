@@ -5,9 +5,13 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "run-s clean test build:ts",
+    "build:ts": "tsc",
+    "clean": "rm -rf ./dist",
     "start": "node ./dist/main.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "run-s test:lint test:jest",
+    "test:jest": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+    "test:lint": "eslint"
   },
   "repository": {
     "type": "git",
@@ -20,11 +24,18 @@
   },
   "homepage": "https://github.com/pmoeller91-dev/web-crawler#readme",
   "devDependencies": {
+    "@babel/core": "^7.24.7",
+    "@babel/preset-env": "^7.24.7",
+    "@babel/preset-typescript": "^7.24.7",
     "@eslint/js": "^9.6.0",
+    "@jest/globals": "^29.7.0",
     "@tsconfig/node22": "^22.0.0",
     "@types/eslint__js": "^8.42.3",
     "@types/node": "^20.14.10",
+    "babel-jest": "^29.7.0",
     "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "npm-run-all": "^4.1.5",
     "prettier": "^3.3.2",
     "typescript": "^5.5.3",
     "typescript-eslint": "^7.15.0"

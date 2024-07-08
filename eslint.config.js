@@ -7,7 +7,7 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   {
-    ignores: ["dist/"],
+    ignores: ["dist/**", "*.cjs"],
     languageOptions: {
       parserOptions: {
         project: "tsconfig.eslint.json",
