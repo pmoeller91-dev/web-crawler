@@ -2,7 +2,7 @@
   "name": "web-crawler",
   "version": "0.1.0",
   "description": "A node-based web-crawler built following a guided project on boot.dev",
-  "main": "index.js",
+  "main": "dist/main.js",
   "type": "module",
   "scripts": {
     "build": "run-s clean test build:ts",

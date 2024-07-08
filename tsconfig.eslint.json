@@ -6,5 +6,6 @@
     "composite": true
   },
   "files": [".prettierrc.mjs", "eslint.config.js"],
-  "include": ["main.ts", "./*.test.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": []
 }
