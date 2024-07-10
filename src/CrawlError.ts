@@ -46,6 +46,7 @@ class CrawlError<C extends CrawlErrorCode = CrawlErrorCode> extends Error {
   constructor(message: string, cause: CrawlErrorCause<C>) {
     super(message, { cause });
   }
+  public declare cause: CrawlErrorCause<C>;
 }
 
 export { CrawlError, CRAWL_ERROR_CODE };

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "@jest/globals";
-import { crawlPage, getURLsFromHTML, normalizeURL } from "./crawl.ts";
+import { fetchPage, getURLsFromHTML, normalizeURL } from "./crawl.ts";
 import { CRAWL_ERROR_CODE, CrawlError } from "./CrawlError.ts";
 
 describe("normalizeURL", () => {
@@ -127,15 +127,23 @@ describe("getURLsFromHTML", () => {
   });
 });
 
-describe("crawlPage", () => {
+describe("fetchPage", () => {
   beforeEach(() => {
     expect.hasAssertions();
+  });
+  it("should return the page body as text if the request is successful and content-type is text/html", async () => {
+    const body = "<html><body><span>Hello</span></body></html>";
+    const mockResponse = new Response(body, { status: 200, statusText: "OK" });
+    mockResponse.headers.set("content-type", "text/html");
+    const fetchLike: () => Promise<Response> = () =>
+      new Promise((resolve) => resolve(mockResponse));
+    return expect(fetchPage("https://google.com", fetchLike)).resolves.toEqual(body);
   });
   it("should throw a CrawlError with code FETCH_ERROR if fetch throws an error", async () => {
     const error = new Error("Some error");
     const fetchLike: () => Promise<Response> = () =>
       new Promise((_resolve, reject) => reject(error));
-    const crawlResult = crawlPage("google.com", fetchLike);
+    const crawlResult = fetchPage("google.com", fetchLike);
     await expect(crawlResult).rejects.toThrow(CrawlError);
     await expect(crawlResult).rejects.toHaveProperty(
       ["cause", "code"],
@@ -146,7 +154,7 @@ describe("crawlPage", () => {
     const error = new Error("Some error");
     const fetchLike: () => Promise<Response> = () =>
       new Promise((_resolve, reject) => reject(error));
-    return expect(crawlPage("google.com", fetchLike)).rejects.toHaveProperty(
+    return expect(fetchPage("google.com", fetchLike)).rejects.toHaveProperty(
       ["cause", "data", "error"],
       error,
     );
@@ -155,7 +163,7 @@ describe("crawlPage", () => {
     const error = "hello";
     const fetchLike: () => Promise<Response> = () =>
       new Promise((_resolve, reject) => reject(error));
-    const crawlResult = crawlPage("google.com", fetchLike);
+    const crawlResult = fetchPage("google.com", fetchLike);
     await expect(crawlResult).rejects.toThrow(CrawlError);
     await expect(crawlResult).rejects.toHaveProperty(
       ["cause", "code"],
@@ -166,7 +174,7 @@ describe("crawlPage", () => {
     const error = "hello";
     const fetchLike: () => Promise<Response> = () =>
       new Promise((_resolve, reject) => reject(error));
-    return expect(crawlPage("google.com", fetchLike)).rejects.toHaveProperty(
+    return expect(fetchPage("google.com", fetchLike)).rejects.toHaveProperty(
       ["cause", "data", "error"],
       error,
     );
@@ -175,7 +183,7 @@ describe("crawlPage", () => {
     const mockResponse = new Response(null, { status: 404, statusText: "Not Found" });
     const fetchLike: () => Promise<Response> = () =>
       new Promise((resolve) => resolve(mockResponse));
-    const crawlResult = crawlPage("google.com", fetchLike);
+    const crawlResult = fetchPage("google.com", fetchLike);
     await expect(crawlResult).rejects.toThrow(CrawlError);
     await expect(crawlResult).rejects.toHaveProperty(
       ["cause", "code"],
@@ -187,7 +195,7 @@ describe("crawlPage", () => {
     const mockResponse = new Response(null, { status: 404, statusText: "Not Found" });
     const fetchLike: () => Promise<Response> = () =>
       new Promise((resolve) => resolve(mockResponse));
-    return expect(crawlPage("google.com", fetchLike)).rejects.toHaveProperty(
+    return expect(fetchPage("google.com", fetchLike)).rejects.toHaveProperty(
       ["cause", "data", "response"],
       mockResponse,
     );
@@ -197,7 +205,7 @@ describe("crawlPage", () => {
     mockResponse.headers.set("content-type", "application/json");
     const fetchLike: () => Promise<Response> = () =>
       new Promise((resolve) => resolve(mockResponse));
-    const crawlResult = crawlPage("google.com", fetchLike);
+    const crawlResult = fetchPage("google.com", fetchLike);
     await expect(crawlResult).rejects.toThrow(CrawlError);
     await expect(crawlResult).rejects.toHaveProperty(
       ["cause", "code"],
@@ -211,7 +219,7 @@ describe("crawlPage", () => {
     mockResponse.headers.set("content-type", badContentType);
     const fetchLike: () => Promise<Response> = () =>
       new Promise((resolve) => resolve(mockResponse));
-    return expect(crawlPage("google.com", fetchLike)).rejects.toHaveProperty(
+    return expect(fetchPage("google.com", fetchLike)).rejects.toHaveProperty(
       ["cause", "data", "contentType"],
       badContentType,
     );
@@ -223,7 +231,7 @@ describe("crawlPage", () => {
     mockResponse.headers.set("content-type", badContentType);
     const fetchLike: () => Promise<Response> = () =>
       new Promise((resolve) => resolve(mockResponse));
-    return expect(crawlPage("google.com", fetchLike)).rejects.toHaveProperty(
+    return expect(fetchPage("google.com", fetchLike)).rejects.toHaveProperty(
       ["cause", "data", "response"],
       mockResponse,
     );
@@ -234,7 +242,7 @@ describe("crawlPage", () => {
     mockResponse.headers.set("content-type", "text/html");
     const fetchLike: () => Promise<Response> = () =>
       new Promise((resolve) => resolve(mockResponse));
-    const crawlResult = crawlPage("google.com", fetchLike);
+    const crawlResult = fetchPage("google.com", fetchLike);
     await expect(crawlResult).rejects.toThrow(CrawlError);
     await expect(crawlResult).rejects.toHaveProperty(["cause", "code"], CRAWL_ERROR_CODE.noBody);
   });
@@ -244,7 +252,7 @@ describe("crawlPage", () => {
     mockResponse.headers.set("content-type", "text/html");
     const fetchLike: () => Promise<Response> = () =>
       new Promise((resolve) => resolve(mockResponse));
-    return expect(crawlPage("google.com", fetchLike)).rejects.toHaveProperty(
+    return expect(fetchPage("google.com", fetchLike)).rejects.toHaveProperty(
       ["cause", "data", "response"],
       mockResponse,
     );

@@ -13,7 +13,10 @@ webCrawler
   .showHelpAfterError()
   .action(async (url: string) => {
     console.log(`Crawler is starting using a base URL of "${url}"...`);
-    await crawlPage(url, fetch);
+    const crawledPages = await crawlPage(url, fetch);
+    console.log(crawledPages);
+    console.log(`Done crawling pages with base URL of "${url}"!`);
+    console.log(`Fetched ${crawledPages.size} pages.`);
   });
 
 await webCrawler.parseAsync();
