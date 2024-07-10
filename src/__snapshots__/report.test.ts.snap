@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`printReport should print a nicely formatted report with pages in descending order 1`] = `
+"Starting pages report...
+
+Found 100 internal links to "google.com"
+Found 50 internal links to "bing.com"
+Found 10 internal links to "yahoo.com"
+
+Pages report completed. Crawled 3 pages and found 160 internal links."
+`;

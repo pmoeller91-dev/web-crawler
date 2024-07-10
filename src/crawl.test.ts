@@ -139,6 +139,14 @@ describe("fetchPage", () => {
       new Promise((resolve) => resolve(mockResponse));
     return expect(fetchPage("https://google.com", fetchLike)).resolves.toEqual(body);
   });
+  it("should return the page body as text if the request is successful and content-type is text/html with charset utf-8", async () => {
+    const body = "<html><body><span>Hello</span></body></html>";
+    const mockResponse = new Response(body, { status: 200, statusText: "OK" });
+    mockResponse.headers.set("content-type", "text/html; charset=utf-8");
+    const fetchLike: () => Promise<Response> = () =>
+      new Promise((resolve) => resolve(mockResponse));
+    return expect(fetchPage("https://google.com", fetchLike)).resolves.toEqual(body);
+  });
   it("should throw a CrawlError with code FETCH_ERROR if fetch throws an error", async () => {
     const error = new Error("Some error");
     const fetchLike: () => Promise<Response> = () =>

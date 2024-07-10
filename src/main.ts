@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { crawlPage } from "./crawl.js";
+import { printReport } from "./report.js";
 
 const version = "0.1.0";
 
@@ -13,10 +14,10 @@ webCrawler
   .showHelpAfterError()
   .action(async (url: string) => {
     console.log(`Crawler is starting using a base URL of "${url}"...`);
+    console.log("---");
     const crawledPages = await crawlPage(url, fetch);
-    console.log(crawledPages);
-    console.log(`Done crawling pages with base URL of "${url}"!`);
-    console.log(`Fetched ${crawledPages.size} pages.`);
+    console.log("---");
+    console.log(printReport(crawledPages));
   });
 
 await webCrawler.parseAsync();

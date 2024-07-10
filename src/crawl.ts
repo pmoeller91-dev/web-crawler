@@ -36,7 +36,7 @@ const isSameDomain = (url: string, otherUrl: string) => {
 
 type FetchLike = (url: string) => Promise<Response>;
 
-type PagesMap = Map<string, number>
+type PagesMap = Map<string, number>;
 
 /**
  * Crawls a URL and returns a list of all site-local URLs accessible from the page.
@@ -68,7 +68,7 @@ const crawlPage = async (url: string, fetchLike: FetchLike): Promise<PagesMap> =
             (typeof CRAWL_ERROR_CODE)["unexpectedContentType"]
           >;
           console.log(
-            `Skipping crawling ${currentUrl} due to invalid content type: "${unexpectedContentTypeError.cause.data.contentType}`,
+            `Skipping crawling ${currentUrl} due to invalid content type: "${unexpectedContentTypeError.cause.data.contentType}"`,
           );
         } else {
           console.log(`Skipping crawling ${currentUrl} due to crawl error: "${e.message}"`);
