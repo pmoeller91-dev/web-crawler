@@ -1,5 +1,6 @@
-import { describe, it, expect } from "@jest/globals";
-import { getURLsFromHTML, normalizeURL } from "./crawl.ts";
+import { describe, it, expect, beforeEach } from "@jest/globals";
+import { crawlPage, getURLsFromHTML, normalizeURL } from "./crawl.ts";
+import { CRAWL_ERROR_CODE, CrawlError } from "./CrawlError.ts";
 
 describe("normalizeURL", () => {
   it.each(["https", "http", "ftp", "smtp", "nonsense"])(
@@ -123,5 +124,129 @@ describe("getURLsFromHTML", () => {
     const expectedLinks = ["https://google.com/#"];
     const links = getURLsFromHTML(document, "https://google.com");
     expect(links).toEqual(expectedLinks);
+  });
+});
+
+describe("crawlPage", () => {
+  beforeEach(() => {
+    expect.hasAssertions();
+  });
+  it("should throw a CrawlError with code FETCH_ERROR if fetch throws an error", async () => {
+    const error = new Error("Some error");
+    const fetchLike: () => Promise<Response> = () =>
+      new Promise((_resolve, reject) => reject(error));
+    const crawlResult = crawlPage("google.com", fetchLike);
+    await expect(crawlResult).rejects.toThrow(CrawlError);
+    await expect(crawlResult).rejects.toHaveProperty(
+      ["cause", "code"],
+      CRAWL_ERROR_CODE.fetchError,
+    );
+  });
+  it("should throw a CrawlError with the error included if fetch throws an error", () => {
+    const error = new Error("Some error");
+    const fetchLike: () => Promise<Response> = () =>
+      new Promise((_resolve, reject) => reject(error));
+    return expect(crawlPage("google.com", fetchLike)).rejects.toHaveProperty(
+      ["cause", "data", "error"],
+      error,
+    );
+  });
+  it("should throw a CrawlError with code FETCH_ERROR if fetch throws something besides an error", async () => {
+    const error = "hello";
+    const fetchLike: () => Promise<Response> = () =>
+      new Promise((_resolve, reject) => reject(error));
+    const crawlResult = crawlPage("google.com", fetchLike);
+    await expect(crawlResult).rejects.toThrow(CrawlError);
+    await expect(crawlResult).rejects.toHaveProperty(
+      ["cause", "code"],
+      CRAWL_ERROR_CODE.fetchError,
+    );
+  });
+  it("should throw a CrawlError with the thrown item included if fetch throws something besides an error", () => {
+    const error = "hello";
+    const fetchLike: () => Promise<Response> = () =>
+      new Promise((_resolve, reject) => reject(error));
+    return expect(crawlPage("google.com", fetchLike)).rejects.toHaveProperty(
+      ["cause", "data", "error"],
+      error,
+    );
+  });
+  it("should throw a CrawlError with code RESPONSE_ERROR if the response has a status code >= 400", async () => {
+    const mockResponse = new Response(null, { status: 404, statusText: "Not Found" });
+    const fetchLike: () => Promise<Response> = () =>
+      new Promise((resolve) => resolve(mockResponse));
+    const crawlResult = crawlPage("google.com", fetchLike);
+    await expect(crawlResult).rejects.toThrow(CrawlError);
+    await expect(crawlResult).rejects.toHaveProperty(
+      ["cause", "code"],
+      CRAWL_ERROR_CODE.errorResponse,
+    );
+  });
+
+  it("should throw a CrawlError with the response included if the response has a status code >= 400", () => {
+    const mockResponse = new Response(null, { status: 404, statusText: "Not Found" });
+    const fetchLike: () => Promise<Response> = () =>
+      new Promise((resolve) => resolve(mockResponse));
+    return expect(crawlPage("google.com", fetchLike)).rejects.toHaveProperty(
+      ["cause", "data", "response"],
+      mockResponse,
+    );
+  });
+  it('should throw a CrawlError with code UNEXPECTED_CONTENT_TYPE if response does not have type "text/html"', async () => {
+    const mockResponse = new Response(null, { status: 200, statusText: "OK" });
+    mockResponse.headers.set("content-type", "application/json");
+    const fetchLike: () => Promise<Response> = () =>
+      new Promise((resolve) => resolve(mockResponse));
+    const crawlResult = crawlPage("google.com", fetchLike);
+    await expect(crawlResult).rejects.toThrow(CrawlError);
+    await expect(crawlResult).rejects.toHaveProperty(
+      ["cause", "code"],
+      CRAWL_ERROR_CODE.unexpectedContentType,
+    );
+  });
+
+  it('should throw a CrawlError with the contentType included if response does not have type "text/html"', () => {
+    const badContentType = "application/json";
+    const mockResponse = new Response(null, { status: 200, statusText: "OK" });
+    mockResponse.headers.set("content-type", badContentType);
+    const fetchLike: () => Promise<Response> = () =>
+      new Promise((resolve) => resolve(mockResponse));
+    return expect(crawlPage("google.com", fetchLike)).rejects.toHaveProperty(
+      ["cause", "data", "contentType"],
+      badContentType,
+    );
+  });
+
+  it('should throw a CrawlError with the response included if response does not have type "text/html"', () => {
+    const badContentType = "application/json";
+    const mockResponse = new Response(null, { status: 200, statusText: "OK" });
+    mockResponse.headers.set("content-type", badContentType);
+    const fetchLike: () => Promise<Response> = () =>
+      new Promise((resolve) => resolve(mockResponse));
+    return expect(crawlPage("google.com", fetchLike)).rejects.toHaveProperty(
+      ["cause", "data", "response"],
+      mockResponse,
+    );
+  });
+
+  it("should throw a CrawlError with code NO_BODY if response has no body", async () => {
+    const mockResponse = new Response(null, { status: 200, statusText: "OK" });
+    mockResponse.headers.set("content-type", "text/html");
+    const fetchLike: () => Promise<Response> = () =>
+      new Promise((resolve) => resolve(mockResponse));
+    const crawlResult = crawlPage("google.com", fetchLike);
+    await expect(crawlResult).rejects.toThrow(CrawlError);
+    await expect(crawlResult).rejects.toHaveProperty(["cause", "code"], CRAWL_ERROR_CODE.noBody);
+  });
+
+  it("should throw a CrawlError with the response attached if response has no body", () => {
+    const mockResponse = new Response(null, { status: 200, statusText: "OK" });
+    mockResponse.headers.set("content-type", "text/html");
+    const fetchLike: () => Promise<Response> = () =>
+      new Promise((resolve) => resolve(mockResponse));
+    return expect(crawlPage("google.com", fetchLike)).rejects.toHaveProperty(
+      ["cause", "data", "response"],
+      mockResponse,
+    );
   });
 });
